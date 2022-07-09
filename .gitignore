@@ -1,9 +1,8 @@
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
 ### VS Code ###
 .vscode/
 
 *vocabulary*
+
+### PyCharm IDEA ###
+.idea
+*pycache*

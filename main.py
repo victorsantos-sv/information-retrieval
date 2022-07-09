@@ -1,161 +1,94 @@
-import string
 import sys
-import os
-from unidecode import unidecode
-from math import log
+from helper.file_helper import read_file, open_file, close_file, write_in_file
+from helper.model_helper import get_terms, get_documents
+from processor.pre_processor import remove_duplicated_words, process_data
+from processor.weighting import calculate_idf, count_idf_frequency, calculate_tf_idf
+from model.Model import Document
 
-class Term:
-    def __init__(self, term, frequency):
-        self.term = term
-        self.frequency = frequency
 
-        self.calculateTF()
+def _get_tf_idf():
+    vocabulary = read_file(sys.argv[2])
 
-    def calculateTF(self):
-        self.tf = log(self.frequency, 2) + 1
-    
-    def calculateTFIDF(self, idf, doc):
-        self.tfIdf = "{:.4f}".format(self.tf * idf)
+    files = read_file(sys.argv[1])
+    documents = get_documents(files)
+    terms = get_terms(documents)
+    idf_frequency = count_idf_frequency(terms, vocabulary)
 
-        print(f'Document: {doc} --------- Term: {self.term} ---------- TF-IDF: {self.tfIdf}\n')
+    idf = calculate_idf(idf_frequency, len(documents))
 
-class Document:
-    def __init__(self, documentName="", content=""):
-        self.documentName = documentName
-        self.content = content
-        self.terms = list()
+    for term in terms:
+        _tf = term.tf
+        term.idf = idf[term.word]
+        _idf = idf[term.word]
+        term.tf_idf = calculate_tf_idf(_tf, _idf)
 
-        self.processData()
-        self.uniqueTerms = removeDuplicatedWords(self.processedTerms)
-        self.countTFFrequency()
-    
-    def countTFFrequency(self):
-        termFrequency = dict()
+    return terms
 
-        for term in self.processedTerms:
-            if term in termFrequency:
-                termFrequency[term] += 1
-            else:
-                termFrequency[term] = 1
-        
-        for term, frequency in termFrequency.items():
-            self.terms.append(Term(term, frequency))
 
-    def processData(self):
-        unidecodedContent = list()
+def create_tf_idf():
+    terms = _get_tf_idf()
 
-        for punctuation in string.punctuation:
-            self.content = self.content.replace(punctuation, "")
-        
-        self.content = self.content.split()
-        
-        for term in self.content:
-            unicodeStr = unidecode(term)
-            unidecodedContent.append(unicodeStr)
+    for term in terms:
+        print(f'Document: {term.document.document_name} --------- Term: {term.word} ---------- TF-IDF: {term.tf_idf}\n')
 
-        unidecodedContent.sort()
 
-        self.processedTerms = unidecodedContent
-
-def countIDFFrequency(documents, vocabulary):
-    termFrequency = dict()
-
-    for document in documents:
-        for term in document.uniqueTerms:
-            if term in vocabulary and term in termFrequency:
-                termFrequency[term] += 1
-            elif term in vocabulary and term not in termFrequency:
-                termFrequency[term] = 1
-            else:
-                termFrequency[term] = 0
-    
-    return dict(sorted(termFrequency.items(), key=lambda term: term[0]))
-
-def calculateIDF(idfFrequency, collectionSize):
-    for term, frequency in idfFrequency.items():
-        if (frequency == 0):
-            idf = 0
-        else:
-            idf = log((collectionSize / frequency), 2)
-        idfFrequency[term] = idf
-    
-    return idfFrequency
-
-def removeDuplicatedWords(rawTerms):
-    return list(dict.fromkeys(rawTerms))
-
-def readDocuments():
-    directory = sys.argv[1]
-
-    documents = list()
-
-    for fileName in sorted(os.listdir(directory)):
-        documentFile = open(directory + '/' + fileName, 'r')
-        fileContent = documentFile.read().lower()
-        documentFile.close()
-        
-        documents.append(Document(fileName, fileContent))
-    
-    return documents
-
-def readVocabulary():
-    vocabularyFileName = sys.argv[2]
-
-    vocabularyFile = open(vocabularyFileName, 'r')
-
-    return vocabularyFile.read().lower().split()
-
-def createTFIDF():
-    vocabulary = readVocabulary()
-
-    documents = readDocuments()
-    print(len(documents))
-    idfFrequency = countIDFFrequency(documents, vocabulary)
-    
-    idf = calculateIDF(idfFrequency, len(documents))
-
-    for document in documents:
-        for term in document.terms:
-            if term.term in idf.keys():
-                term.calculateTFIDF(idf[term.term], document.documentName)
-
-def createBoW():
-    documents = readDocuments()
-
+def get_bow():
+    files = read_file(sys.argv[1])
+    documents = get_documents(files)
     vocabulary = list()
 
     for document in documents:
-        for content in document.processedTerms:
+        for content in document.processed_terms:
             vocabulary.append(content)
-    
+
     vocabulary.sort()
 
-    vocabularyFile = open('vocabulary.txt', 'w')
+    vocabulary_file = open_file('vocabulary.txt', 'w')
 
-    vocabulary = removeDuplicatedWords(vocabulary)
+    vocabulary = remove_duplicated_words(vocabulary)
 
     for word in vocabulary:
-        vocabularyFile.write(word + '\n')
+        write_in_file(vocabulary_file, word + '\n')
 
-    vocabularyFile.close()
+    close_file(vocabulary_file)
 
-    bagOfWords = list()
+    bag_of_words = list()
 
     for document in documents:
-        internalFileBag = list()
+        internal_file_bag = list()
 
         for word in vocabulary:
-            if (word in document.uniqueTerms):
-                internalFileBag.append(1)
+            if word in document.unique_terms:
+                internal_file_bag.append(1)
             else:
-                internalFileBag.append(0)
-        
-        bagOfWords.append({'FILE': document.documentName, 'BoW': internalFileBag})
+                internal_file_bag.append(0)
 
-    print(bagOfWords)
+        bag_of_words.append({'FILE': document.document_name, 'BoW': internal_file_bag})
+
+    for file_bag in bag_of_words:
+        print(file_bag)
+
+
+def get_cosine_similarity():
+    files = read_file(sys.argv[1])
+    vocabulary = read_file(sys.argv[2])
+    query = sys.argv[3]
+    terms = _get_tf_idf()
+    query_as_document = list()
+    query_as_document.append(Document('query', query))
+
+    query_terms = get_terms(query_as_document)
+
+    for query_term in query_terms:
+        print(query_term.tf)
+
+    # print(query_terms)
+
 
 if __name__ == "__main__":
-    if len(sys.argv) > 2:
-        createTFIDF()
+    if len(sys.argv) == 2:
+        get_bow()
+    elif len(sys.argv) == 3:
+        create_tf_idf()
     else:
-        createBoW()
+        get_cosine_similarity()
