@@ -3,7 +3,7 @@ from helper.file_helper import read_file, open_file, close_file, write_in_file
 from helper.model_helper import get_terms, get_documents, to_list
 from processor.pre_processor import remove_duplicated_words
 from processor.weighting import calculate_idf, count_idf_frequency, calculate_tf_idf
-from processor.cosine import calculate_norm
+from processor.cosine import calculate_norm, calculate_inner_product, calculate_cosine_similarity
 from model.Model import Document
 
 
@@ -25,12 +25,14 @@ def _get_tf_idf():
     return documents
 
 
-def create_tf_idf():
+def get_tf_idf():
     documents = _get_tf_idf()
 
     for document in documents:
         for term in document.unique_terms:
-            print(f'Document: {document.document_name} --------- Term: {term.word} ---------- TF-IDF: {term.tf_idf}\n')
+            _tf_idf = "{:.3f}".format(term.tf_idf)
+
+            print(f'Document: {document.document_name} --------- Term: {term.word} ---------- TF-IDF: {_tf_idf}\n')
 
 
 def get_bow():
@@ -59,7 +61,7 @@ def get_bow():
         internal_file_bag = list()
 
         for word in vocabulary:
-            if word in document.unique_terms:
+            if word in remove_duplicated_words(document.processed_terms):
                 internal_file_bag.append(1)
             else:
                 internal_file_bag.append(0)
@@ -71,63 +73,26 @@ def get_bow():
 
 
 def get_cosine_similarity():
-    files = read_file(sys.argv[1])
-    vocabulary = read_file(sys.argv[2])
     query = sys.argv[3]
     documents = _get_tf_idf()
     query_as_document = Document('query', query)
-    query_documents = get_terms(to_list(query_as_document))
-    query_terms = query_as_document.unique_terms
-    inner_product = dict()
-    terms = list()
+    get_terms(to_list(query_as_document))
 
-    for document in documents:
-        for term in document.unique_terms:
-            terms.append(term)
+    calculate_inner_product(documents, query_as_document)
+    calculate_norm(documents)
+    calculate_norm(to_list(query_as_document))
 
-    # for query_document in query_documents:
-    #     for query_term in query_document.unique_terms:
-    #         term_index = [document_term.word for document_term in terms].index(query_term.word)
-    #
-    #         query_term.idf = terms[term_index].idf
-    #         query_term.tf_idf = calculate_tf_idf(query_term.tf, query_term.idf)
+    ordered_by_cosine = calculate_cosine_similarity(documents, query_as_document)
 
-    for document in documents:
-        _inner_product_sum = 0
-        inner_product = dict()
-        for term in document.unique_terms:
-            try:
-                query_term_index = [query_term.word for query_term in query_terms].index(term.word)
-
-                _idf = term.idf
-
-                query_terms[query_term_index].idf = _idf
-                query_terms[query_term_index].tf_idf = calculate_tf_idf(query_terms[query_term_index].tf, _idf)
-
-                inner_product[term.word] = float(term.tf_idf) * float(query_terms[query_term_index].tf_idf)
-            except:
-                pass
-
-        for value in inner_product.values():
-            _inner_product_sum += value
-
-        document.inner_product = _inner_product_sum
-
-    # for query_document in query_documents:
-    #     for query_term in query_document.unique_terms:
-    #         query_term.tf_idf = calculate_tf_idf(query_term.tf, query_term.idf)
-    #
-    #         term_index = [document_term.word for document_term in terms].index(query_term.word)
-    #
-    #         inner_product[query_term.word] = float(query_term.tf_idf) * float(terms[term_index].tf_idf)
-
-    calculate_norm(terms)
+    for document in ordered_by_cosine:
+        _cosine_similarity = '{:.3f}'.format(document.cosine_similarity)
+        print(f'Documento: {document.document_name} - Grau de similaridade = {_cosine_similarity}')
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         get_bow()
     elif len(sys.argv) == 3:
-        create_tf_idf()
+        get_tf_idf()
     else:
         get_cosine_similarity()

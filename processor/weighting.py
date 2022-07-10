@@ -18,9 +18,7 @@ def calculate_idf(idf_frequency, collection_size):
 
 
 def calculate_tf_idf(tf, idf):
-    tf_idf = "{:.3f}".format(tf * idf)
-
-    return tf_idf
+    return tf * idf
 
 
 def count_idf_frequency(documents, vocabulary):

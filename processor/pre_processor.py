@@ -30,7 +30,8 @@ def unidecode_data(data):
 
 
 def process_data(data):
-    _data_punctuation = remove_punctuation(data)
+    _data_lowercase = data.lower()
+    _data_punctuation = remove_punctuation(_data_lowercase)
     _data_split = _data_punctuation.split()
     _unidecode_terms = unidecode_data(_data_split)
 

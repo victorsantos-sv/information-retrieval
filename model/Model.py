@@ -19,6 +19,7 @@ class Document:
         self.norm = None
         self.unique_terms = None
         self.inner_product = None
+        self.cosine_similarity = None
         self.document_name = document_name
         self.content = content
 
