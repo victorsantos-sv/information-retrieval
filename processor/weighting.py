@@ -1,4 +1,5 @@
 from math import log as logarithm
+from processor.pre_processor import remove_duplicated_words
 
 
 def calculate_tf(tf_frequency):
@@ -22,18 +23,18 @@ def calculate_tf_idf(tf, idf):
     return tf_idf
 
 
-def count_idf_frequency(terms, vocabulary):
+def count_idf_frequency(documents, vocabulary):
     term_frequency = dict()
 
-    for term in terms:
-        word = term.word
+    for document in documents:
+        for term in remove_duplicated_words(document.processed_terms):
+            word = term
 
-        if word in vocabulary and word in term_frequency:
-            term_frequency[word] += 1
-        elif word in vocabulary and word not in term_frequency:
-            term_frequency[word] = 1
-        else:
-            term_frequency[word] = 0
-        # for unique_term in document.unique_terms:
+            if word in vocabulary and word in term_frequency:
+                term_frequency[word] += 1
+            elif word in vocabulary and word not in term_frequency:
+                term_frequency[word] = 1
+            else:
+                term_frequency[word] = 0
 
     return dict(sorted(term_frequency.items(), key=lambda item: item[0]))

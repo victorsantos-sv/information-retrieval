@@ -7,22 +7,22 @@ class Term:
         self.tf_idf = None
         self.idf = None
         self.tf = None
-        self.document = None
         self.word = word
         self.frequency = frequency
 
         self.tf = calculate_tf(self.frequency)
 
-    def calculate_norm(self):
-        print(self.tf_idf)
-
 
 class Document:
     def __init__(self, document_name="", content=""):
         self.processed_terms = None
+        self.norm = None
+        self.unique_terms = None
+        self.inner_product = None
         self.document_name = document_name
         self.content = content
-        self.norm = None
 
         self.processed_terms = process_data(self.content)
-        self.unique_terms = remove_duplicated_words(self.processed_terms)
+
+    def populate_terms(self, terms):
+        self.unique_terms = remove_duplicated_words(terms)
