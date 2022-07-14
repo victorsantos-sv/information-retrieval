@@ -3,6 +3,7 @@ import re
 from unidecode import unidecode
 from nltk import word_tokenize
 from nltk.corpus import stopwords
+from nltk.stem import RSLPStemmer
 
 
 def remove_duplicated_words(data):
@@ -46,11 +47,23 @@ def _remove_stopwords(data):
     return [word for word in tokens if not word.lower() in _stopwords]
 
 
+def _stem_data(data):
+    _stemmer = RSLPStemmer()
+    _stemmed_data = list()
+
+    for word in data:
+        _stemmed = _stemmer.stem(word)
+        _stemmed_data.append(_stemmed)
+
+    return _stemmed_data
+
+
 def process_data(data):
     _data_lowercase = data.lower()
     _data_without_number = remove_numbers(_data_lowercase)
     _data_punctuation = _remove_punctuation(_data_without_number)
     _data_without_stopwords = _remove_stopwords(_data_punctuation)
     _unidecode_terms = _unidecode_data(_data_without_stopwords)
+    _stemmed_data = _stem_data(_unidecode_terms)
 
-    return _unidecode_terms
+    return _stemmed_data
