@@ -7,7 +7,7 @@ from processor.cosine import calculate_norm, calculate_inner_product, calculate_
 from model.Model import Document
 
 
-def _get_tf_idf():
+def create_tf_idf():
     vocabulary = read_file(sys.argv[2])
 
     files = read_file(sys.argv[1])
@@ -17,16 +17,15 @@ def _get_tf_idf():
 
     for document in documents:
         for term in document.unique_terms:
-            _tf = term.tf
+            tf = term.tf
             term.idf = idf[term.word]
-            _idf = idf[term.word]
-            term.tf_idf = calculate_tf_idf(_tf, _idf)
+            term.tf_idf = calculate_tf_idf(tf, term.idf)
 
     return documents
 
 
 def get_tf_idf():
-    documents = _get_tf_idf()
+    documents = create_tf_idf()
 
     for document in documents:
         for term in document.unique_terms:
@@ -74,7 +73,7 @@ def get_bow():
 
 def get_cosine_similarity():
     query = sys.argv[3]
-    documents = _get_tf_idf()
+    documents = create_tf_idf()
     query_as_document = Document('query', query)
     get_terms(to_list(query_as_document))
 
@@ -85,8 +84,8 @@ def get_cosine_similarity():
     ordered_by_cosine = calculate_cosine_similarity(documents, query_as_document)
 
     for document in ordered_by_cosine:
-        _cosine_similarity = '{:.3f}'.format(document.cosine_similarity)
-        print(f'Documento: {document.document_name} - Grau de similaridade = {_cosine_similarity}')
+        cosine_similarity = '{:.3f}'.format(document.cosine_similarity)
+        print(f'Documento: {document.document_name} - Grau de similaridade = {cosine_similarity}')
 
 
 if __name__ == "__main__":

@@ -10,60 +10,60 @@ def remove_duplicated_words(data):
     return list(dict.fromkeys(data))
 
 
-def _remove_punctuation(data):
+def remove_punctuation(data):
     for punctuation in string.punctuation:
         data = data.replace(punctuation, '')
 
     return data
 
 
-def _sort(data):
+def sort(data):
     data.sort()
 
     return data
 
 
 def remove_numbers(data):
-    _number_pattern = r'[0-9]'
+    number_pattern = r'[0-9]'
 
-    return re.sub(_number_pattern, '', data)
+    return re.sub(number_pattern, '', data)
 
 
-def _unidecode_data(data):
-    _unidecode_terms = list()
+def unidecode_data(data):
+    unidecode_terms = list()
 
     for term in data:
         unidecode_str = unidecode(term)
-        _unidecode_terms.append(unidecode_str)
+        unidecode_terms.append(unidecode_str)
 
-    return _sort(_unidecode_terms)
+    return sort(unidecode_terms)
 
 
-def _remove_stopwords(data):
-    _stopwords = set(stopwords.words('portuguese'))
+def remove_stopwords(data):
+    portuguese_stopwords = set(stopwords.words('portuguese'))
 
     tokens = word_tokenize(data)
 
-    return [word for word in tokens if not word.lower() in _stopwords]
+    return [word for word in tokens if not word.lower() in portuguese_stopwords]
 
 
-def _stem_data(data):
-    _stemmer = RSLPStemmer()
-    _stemmed_data = list()
+def stem_data(data):
+    stemmer = RSLPStemmer()
+    stemmed_data = list()
 
     for word in data:
-        _stemmed = _stemmer.stem(word)
-        _stemmed_data.append(_stemmed)
+        _stemmed = stemmer.stem(word)
+        stemmed_data.append(_stemmed)
 
-    return _stemmed_data
+    return stemmed_data
 
 
 def process_data(data):
-    _data_lowercase = data.lower()
-    _data_without_number = remove_numbers(_data_lowercase)
-    _data_punctuation = _remove_punctuation(_data_without_number)
-    _data_without_stopwords = _remove_stopwords(_data_punctuation)
-    _unidecode_terms = _unidecode_data(_data_without_stopwords)
-    _stemmed_data = _stem_data(_unidecode_terms)
+    data_lowercase = data.lower()
+    data_without_number = remove_numbers(data_lowercase)
+    data_punctuation = remove_punctuation(data_without_number)
+    data_without_stopwords = remove_stopwords(data_punctuation)
+    unidecode_terms = unidecode_data(data_without_stopwords)
+    stemmed_data = stem_data(unidecode_terms)
 
-    return _stemmed_data
+    return stemmed_data
