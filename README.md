@@ -12,7 +12,7 @@
 
 ### To install the dependencies, simply run the command
 ```
-$ pip install -r requirements.txt
+$ pip3 install -r requirements.txt
 ```
 
 ### After installing it, you need to download the nltk packages
@@ -27,15 +27,15 @@ $ pip install -r requirements.txt
 ### Now you can start the code.
 - For the first option, you need to pass the documents folder through command line
 ```
-$ python main.py ./documents/anthems
+$ python3 main.py ./documents/anthems
 ```
 
 - For the second option, you need to pass the documents folder with the vocabulary file, which was created at the first step, also throug command line
 ```
-$ python main.py ./documents/anthems ./vocabulary.txt
+$ python3 main.py ./documents/anthems ./vocabulary.txt
 ```
 
 - And for the third option, you need to send your query alongside the documents folder and the vocabulary file
 ```
-$ python main.py ./documents/anthems ./vocabulary.txt "paulista tricolor"
+$ python3 main.py ./documents/anthems ./vocabulary.txt "paulista tricolor"
 ```
