@@ -10,14 +10,9 @@
 - NLTK
 - Unidecode
 
-### To install Unidecode, simply run the command
+### To install the dependencies, simply run the command
 ```
-$ pip install --user -U unidecode
-```
-
-### To install NLTK, you need to run the following commands
-```
-$ pip install --user -U nltk
+$ pip install -r requirements.txt
 ```
 
 ### After installing it, you need to download the nltk packages
